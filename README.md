@@ -25,6 +25,7 @@ For image modifications such as rotating, you must have ffmpeg installed.
 
 ## Usage
 
+```
 usage: pictriage DIR [--move-dir MOVE_DIR]
 
 manually organize & clean-up a folder of images
@@ -34,10 +35,11 @@ positional arguments:
 
 optional arguments:
   --move-dir MOVE_DIR   Directory to move images to (if the 'move' action is selected)
-
+```
 
 ## Extra configuration flags
 
+```
   --thumbnail-width THUMBNAIL_WIDTH
                         Width of thumbnails, in pixels (when in thumbnail
                         mode)
@@ -45,7 +47,7 @@ optional arguments:
                         Width of the zoom pane, in pixels
   --zoom-image-width ZOOM_IMAGE_WIDTH
                         Width of the zoomed image, in pixels
-  
+```
 
 
 
