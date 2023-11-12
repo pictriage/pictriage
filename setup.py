@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='pictriage',
-    version='1.0.4',
+    version='1.0.5',
     author='Author Name',
     author_email='author@example.com',
     description='Description of my package',
