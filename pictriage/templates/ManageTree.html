@@ -163,10 +163,18 @@
         {% for folder, fps in folders %}
     <div class="folder" id="folder-{{ folder }}">
           <h2 style="display: inline">{{ folder }}/
-            <!-- should always show it because don't want to wait for a page refresh -->
-            <button class="clickable" data-fp="{{ folder }}" data-isfolder="1">Click all</button>
-
-          </h2>
+            
+            
+            </h2>
+          <!-- should always show it because don't want to wait for a page refresh -->
+          <button class="clickable" data-fp="{{ folder }}" data-isfolder="1">Click all</button>
+          <form method="post" 
+              hx-post="/file-browser" 
+              hx-target="find .status"
+              style="display: inline">
+              <button name="folder" value="{{ folder }}">📁 {{ file_browser_name }}</button>
+              <span class="status"></span>
+            </form>
         <div class="flex-container">
           {% for fp in fps %}
           <div class="clickable" data-fp='{{ fp }}'>

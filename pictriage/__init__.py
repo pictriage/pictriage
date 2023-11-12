@@ -34,12 +34,12 @@ IMAGE_FILE_EXTENSIONS = [
 ]
 MOVE_DIR_FLAG = '--move-dir'
 
-parser = argparse.ArgumentParser(description='Browse nested image folders.')
+parser = argparse.ArgumentParser(description="manually organize & clean-up a folder of images")
 parser.add_argument(
-    'dir', nargs='?', default='.', help="Folder with the images to triage"
+    'dir', nargs='?', default='.', help="Root folder containing images (can contain subfolders)"
 )
 
-parser.add_argument(MOVE_DIR_FLAG, help="Directory to move images to")
+parser.add_argument(MOVE_DIR_FLAG, help="Directory to move images to (if the 'move' action is selected)")
 parser.add_argument(
     '--thumbnail-width',
     type=int,
@@ -56,7 +56,7 @@ parser.add_argument(
     help="Width of the zoomed image, in pixels",
 )
 parser.add_argument('--host', default='127.0.0.1')
-parser.add_argument('--port', default=7000)
+parser.add_argument('--port', default=random.randint(52000, 53000))
 args = parser.parse_args()
 files_root = Path(args.dir).resolve()
 if not files_root.is_dir():
@@ -79,6 +79,12 @@ else:
 
 loader = ibis.loaders.FileReloader(Path(__file__).parent.joinpath('templates'))
 
+if sys.platform == 'win32':
+    file_browser_name = "Windows Explorer"
+elif sys.platform == 'darwin':
+    file_browser_name = "Finder"
+else:
+    file_browser_name = "File browser"
 
 @register('static')
 class StaticNode(Node):
@@ -94,6 +100,8 @@ class StaticNode(Node):
 class StaticNode(Node):
     def wrender(self, context):
         return str(random.randint(0, 10000000))
+
+
 
 
 class Index(HTTPEndpoint):
@@ -141,6 +149,7 @@ class Index(HTTPEndpoint):
             ZOOM_IMAGE_WIDTH=zoom_image_width,
             MOVE_DIR_FLAG=MOVE_DIR_FLAG,
             root_folder_name=files_root.parts[-1],
+            file_browser_name=file_browser_name,
         )
         print('current_action', GlobalState.click_action)
         template = loader('ManageTree.html')
@@ -162,7 +171,18 @@ class SettingsChanged(HTTPEndpoint):
         if new_size:
             GlobalState.img_width = int(new_size)
 
+        
+
         return Response('')
+
+class LaunchFileBrowser(HTTPEndpoint):
+    async def post(self, request: Request):
+        form = await request.form()
+
+        folder = form['folder']
+        os.startfile(files_root.joinpath(folder))
+        
+        return Response("Launched file browser")
 
 
 class renderLensVisibility(HTTPEndpoint):
@@ -193,7 +213,7 @@ def process_image(path: Path):
         target = Path(recycle_bin).joinpath(rel_to_files_root)
         target.parent.mkdir(exist_ok=True, parents=True)
         path.rename(target)
-        print(f"Moved image to {recycle_bin}")
+        print(f"Moved image to {recycle_bin}, will delete when the server is stopped.")
         return
     if GlobalState.click_action == ClickAction.MOVE:
         target = move_dir.joinpath(rel_to_files_root)
@@ -209,7 +229,7 @@ def process_image(path: Path):
         # have to quote it because e.g. some file names can start with hyphen
         # (e.g. youtube videos)
         # which is interpreted as an option flag
-        path_for_ffmpeg = './' + path_for_ffmpeg.relative_to(Path('.')).as_posix()
+        # path_for_ffmpeg = './' + path_for_ffmpeg.relative_to(Path('.')).as_posix()
 
         transpose = {ClickAction.ROTATE_LEFT: 2, ClickAction.ROTATE_RIGHT: 1}[
             GlobalState.click_action
@@ -279,6 +299,7 @@ app = Starlette(
         Route('/', Index),
         Route('/clicked', ImageClicked),
         Route('/settings', SettingsChanged),
+        Route('/file-browser', LaunchFileBrowser),
         Route('/lens_visibility', renderLensVisibility),
         Mount(
             '/static',
@@ -316,7 +337,7 @@ def main():
         f'{__name__}:app',
         host=args.host,
         port=args.port,
-        reload=True,
+        reload=bool(os.getenv('PICTRIAGE_DEV')),
         reload_dirs=[Path(__file__).parent],
         # Don't write access log because we get tons of output when
         # loading a large folder

@@ -2,11 +2,12 @@ from setuptools import setup, find_packages
 
 setup(
     name='pictriage',
-    version='1.0.0',
+    version='1.0.2',
     author='Author Name',
     author_email='author@example.com',
     description='Description of my package',
     packages=find_packages(),
+    include_package_data=True,
     install_requires=[
         'starlette',
         'uvicorn',
