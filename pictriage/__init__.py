@@ -8,6 +8,7 @@ import subprocess
 import sys
 import tempfile
 from pathlib import Path
+import shlex
 
 import ibis
 import natsort
@@ -241,15 +242,14 @@ def process_image(path: Path):
 
         # TODO: would be better to rotate losslessly through EXIF
         # which would be faster also
-        
+
         call(
             "ffmpeg -i",
-            path_for_ffmpeg,
+            shlex.quote(str(path_for_ffmpeg)),
             '-vf',
             f"transpose={transpose}",
             '-frames:v 1 -update 1',
-
-            temp_file_path,
+            shlex.quote(str(temp_file_path)),
             '-y',
         )
         path_for_ffmpeg.unlink()
@@ -261,7 +261,8 @@ def process_image(path: Path):
 def call(*segments, capture_output=False):
     cmd_str = ' '.join(str(arg) for arg in segments)
     print(cmd_str)
-    cmd = cmd_str.split()
+    cmd = shlex.split(cmd_str)
+    print(cmd)
     try:
         return subprocess.run(cmd, capture_output=capture_output, check=True)
     except subprocess.CalledProcessError as exc:
@@ -275,9 +276,9 @@ class ImageClicked(HTTPEndpoint):
         abspath = files_root.joinpath(rel_to_files_dir)
         if abspath.is_dir():
             for img in abspath.iterdir():
-                assert img.is_file(), img
-                process_image(img)
-            if not list(abspath.iterdir()):
+                if img.is_file() and img.suffix in IMAGE_FILE_EXTENSIONS:
+                    process_image(img)
+            if GlobalState.click_action == ClickAction.DELETE and not list(abspath.iterdir()):
                 abspath.rmdir()
         else:
             process_image(abspath)

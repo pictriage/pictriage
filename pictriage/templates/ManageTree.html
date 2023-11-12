@@ -99,6 +99,7 @@
           hx-trigger="change"
           hx-swap="none"
           onclick="renderClickAction()"
+          style="padding: 10px;"
       >
       {% for action_option in AVAILABLE_ACTIONS %}
         <option value="{{ action_option }}"
@@ -160,6 +161,7 @@
       {% endfor %}
       </ol>
     </details>
+    <br>
         {% for folder, fps in folders %}
     <div class="folder" id="folder-{{ folder }}">
           <h2 style="display: inline">{{ folder }}/
