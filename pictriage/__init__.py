@@ -82,10 +82,13 @@ loader = ibis.loaders.FileReloader(Path(__file__).parent.joinpath('templates'))
 
 if sys.platform == 'win32':
     file_browser_name = "Windows Explorer"
+    file_browser_command = 'explorer'
 elif sys.platform == 'darwin':
     file_browser_name = "Finder"
+    file_browser_command = 'open'
 else:
     file_browser_name = "File browser"
+    file_browser_command = 'xdg-open'
 
 @register('static')
 class StaticNode(Node):
@@ -181,7 +184,9 @@ class LaunchFileBrowser(HTTPEndpoint):
         form = await request.form()
 
         folder = form['folder']
-        os.startfile(files_root.joinpath(folder))
+        subprocess.run([
+            file_browser_command,
+            files_root.joinpath(folder)])
         
         return Response("Launched file browser")
 

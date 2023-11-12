@@ -14,7 +14,6 @@ function getClickAction() {
 
 function renderClickAction() {
   let cursor = getClickAction() === NONE_CLICK_ACTION ? null : 'pointer';
-  console.log('click')
   for (let ele of document.querySelectorAll('.clickable')) {
     ele.style.cursor = cursor;
   }
