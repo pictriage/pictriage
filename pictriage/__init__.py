@@ -235,6 +235,7 @@ def process_image(path: Path):
             GlobalState.click_action
         ]
 
+        temp_file_path = Path(recycle_bin, path.name)
         call(
             "ffmpeg -i",
             path_for_ffmpeg,
@@ -242,9 +243,15 @@ def process_image(path: Path):
             f"transpose={transpose}",
             '-frames:v 1 -update 1',
             #'-c:v copy',
-            path_for_ffmpeg,
+            # ffmpeg can't edit files in place (actually it seems it can sometimes,
+            # but not always)
+            temp_file_path,
             '-y',
         )
+        path_for_ffmpeg.unlink()
+        temp_file_path.rename(path_for_ffmpeg)
+
+        
 
 
 def call(*segments, capture_output=False):
