@@ -235,16 +235,20 @@ def process_image(path: Path):
             GlobalState.click_action
         ]
 
+        # ffmpeg can't edit files in place 
+        # (actually it seems it can sometimes, but not always)
         temp_file_path = Path(recycle_bin, path.name)
+
+        # TODO: would be better to rotate losslessly through EXIF
+        # which would be faster also
+        
         call(
             "ffmpeg -i",
             path_for_ffmpeg,
             '-vf',
             f"transpose={transpose}",
             '-frames:v 1 -update 1',
-            #'-c:v copy',
-            # ffmpeg can't edit files in place (actually it seems it can sometimes,
-            # but not always)
+
             temp_file_path,
             '-y',
         )
