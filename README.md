@@ -17,11 +17,15 @@ You can also click on a whole subfolder (e.g. delete the subfolder).
 
 Also features a zoom pane (zoom in on the current image)
 
-## Installation
+## Quickstart
 
-`pip install pictriage`
+```
+pip install pictriage
+cd folder-with-images
+pictriage
+```
 
-For image modifications such as rotating, you must have ffmpeg installed.
+For image modifications such as rotating, you must have ffmpeg on your PATH.
 
 ## Usage
 
